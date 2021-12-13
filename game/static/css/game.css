@@ -1,2 +1,33 @@
-.hyld{
+.hyld-menu {
+    width: 100%;
+    height: 100%;
+    background-image: url("/static/image/menu/background.gif");
+    background-size: 100% 100%;
+    user-select: none;
+}
+
+.hyld-menu-field {
+    width: 20vw;
+    position: relative;
+    top: 40vh;
+    left: 19vw;
+}
+
+.hyld-menu-field-item{
+    color:white; /*字体颜色*/
+    height:7vh; /*字体高度*/
+    width:18vw; /*字体的宽度*/
+    font-size:6vh; /*字体大小*/
+    font-style:italic; /*设置为斜体，默认是正体*/
+    padding:2vh; /*字体矩形中字体边框和字体中间间隔的大小*/
+    text-align:center; /*设置居中，默认左对齐*/
+    background-color:rgba(39,21,28,0.6); /*设置背景颜色*/
+    border-radius:10px; //字体角圆弧半径*/
+    letter-spacing:0.5vw; /*两个字之间的宽度*/
+    cursor:pointer; /*控制我们鼠标落在字体上的样式，pointer是指小手的样式*/
+}
+
+.hyld-menu-field-item:hover {
+    transform: scale(1.2);
+    transition: 100ms;
 }
