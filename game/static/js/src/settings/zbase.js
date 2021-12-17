@@ -72,7 +72,7 @@ class Settings {
         </div>
         <br>
         <div class="hyld-settings-acwing">
-            <img width="30" src="https://app820.acapp.acwing.com.cn/static/image/settings/acwing_logo.jpg">
+            <img width="30" src="https://app820.acapp.acwing.com.cn/static/image/settings/acwing_logo.png">
             <br>
             <div>
                 AcWing一键登录
@@ -100,6 +100,8 @@ class Settings {
 
         this.$register.hide();
 
+        this.$acwing_login = this.$settings.find('.hyld-settings-acwing img')
+
         this.root.$hyld.append(this.$settings);
 
         this.start();
@@ -124,6 +126,9 @@ class Settings {
         this.$login_submit.click(function() {
             outer.login_on_remote();
         });
+        this.$acwing_login.click(function (){
+            outer.acwing_login();
+        })
     }
 
     add_listening_events_register() {
@@ -200,6 +205,18 @@ class Settings {
             }
         });
     }
+    acwing_login() {// 申请acwing第三方登录
+        $.ajax({
+            url: "https://app820.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
+            type: "GET",
+            success: function (resp) {
+                console.log(resp)
+                if (resp.result === "success") {
+                    window.location.replace(resp.apply_code_url);
+                }
+            }
+        });
+    }
 
     register() {  // 打开注册界面
         this.$login.hide();
@@ -240,4 +257,6 @@ class Settings {
     show() {
         this.$settings.show();
     }
+
+
 }
