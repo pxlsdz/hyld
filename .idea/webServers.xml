@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="6afc789a-69e6-4f17-8ebe-af7aa806c85a" name="django_sdz">
+        <fileTransfer rootFolder="/home/sdz" accessType="SFTP" host="121.199.59.80" port="20000" sshConfigId="c19de0ab-1b07-4017-8263-8be73c225171" sshConfig="sdz@121.199.59.80:20000 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

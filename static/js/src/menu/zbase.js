@@ -15,7 +15,7 @@ class HyldMenu {
                     </div>
                     <br>
                     <div class="hyld-menu-field-item hyld-menu-field-item-settings">
-                        设置
+                         退出
                     </div>
                 </div>
             </div>`);     

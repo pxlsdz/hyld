@@ -32,6 +32,12 @@ class Player extends HyldObject {
         this.spent_time = 0; // 保护期
 
         this.cur_skill = null; // 标记当前是否选中技能（未来会有多个技能）
+
+        if (this.is_me) { // 加载头像
+            this.img = new Image();
+            this.img.src = this.playground.root.settings.photo;
+        }
+
     }
 
     start() {
@@ -156,11 +162,22 @@ class Player extends HyldObject {
         this.render();
     }
 
-    render() { // 渲染函数，画一个圆
-        this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        this.ctx.fillStyle = this.color;
-        this.ctx.fill();
+    render() { // 渲染函数，画一个圆或以图片当头像
+        if (this.is_me) {
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            this.ctx.stroke();
+            this.ctx.clip();
+            this.ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+            this.ctx.restore();
+        } else {
+            this.ctx.beginPath();
+            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            this.ctx.fillStyle = this.color;
+            this.ctx.fill();
+        }
+
     }
 
     on_destroy() {

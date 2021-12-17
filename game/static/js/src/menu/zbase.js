@@ -15,10 +15,11 @@ class HyldMenu {
                     </div>
                     <br>
                     <div class="hyld-menu-field-item hyld-menu-field-item-settings">
-                        设置
+                        退出
                     </div>
                 </div>
-            </div>`);     
+            </div>`);
+        this.$menu.hide();
         // 将网页对象放进浏览器
         this.root.$hyld.append(this.$menu);
         // 找到上方html对象定义的三个按钮
@@ -43,7 +44,7 @@ class HyldMenu {
             console.log("click multi mode");
         });
         this.$settings.click(function(){
-            console.log("click settings");
+            outer.root.settings.logout_on_remote();
         });
     }
 
