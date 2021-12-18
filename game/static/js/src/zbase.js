@@ -11,7 +11,7 @@ export class Hyld {
         this.settings = new Settings(this);
         // 创建一个菜单界面，赋值给menu
         this.menu = new HyldMenu(this);
-        // 创建一个游戏，赋值给playground
+        // 创建一个游戏界面，赋值给playground
         this.playground = new HyldPlayground(this);
 
         this.start();

@@ -233,10 +233,12 @@ class Settings {
     }
 
     acapp_login(appid, redirect_uri, scope, state) { // 调用AcWingOS登录授权API
+        console.log("acapp_login");
         let outer = this;
 
         this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function (resp) {
             if (resp.result === "success") {
+                console.log("acapp_login_success");
                 outer.username = resp.username;
                 outer.photo = resp.photo;
                 outer.hide();
@@ -248,6 +250,7 @@ class Settings {
 
     getinfo_acapp() { // 向后端申请code
         let outer = this;
+        console.log("acapp_code");
         $.ajax({
             url: "https://app820.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
             type: "GET",
