@@ -108,8 +108,12 @@ class Settings {
     }
 
     start() {
-        this.getinfo();
-        this.add_listening_events();
+        if (this.platform == "ACAPP") {
+            this.getinfo_acapp();
+        } else {
+            this.getinfo_web();
+            this.add_listening_events();
+        }
     }
 
     add_listening_events() {
@@ -120,23 +124,23 @@ class Settings {
     add_listening_events_login() {
         let outer = this;
 
-        this.$login_register.click(function() {
+        this.$login_register.click(function () {
             outer.register();
         });
-        this.$login_submit.click(function() {
+        this.$login_submit.click(function () {
             outer.login_on_remote();
         });
-        this.$acwing_login.click(function (){
+        this.$acwing_login.click(function () {
             outer.acwing_login();
         })
     }
 
     add_listening_events_register() {
         let outer = this;
-        this.$register_login.click(function() {
+        this.$register_login.click(function () {
             outer.login();
         });
-        this.$register_submit.click(function() {
+        this.$register_submit.click(function () {
             outer.register_on_remote();
         });
     }
@@ -154,7 +158,7 @@ class Settings {
                 username: username,
                 password: password,
             },
-            success: function(resp) {
+            success: function (resp) {
                 console.log(resp);
                 if (resp.result === "success") {
                     location.reload();
@@ -180,7 +184,7 @@ class Settings {
                 password: password,
                 password_confirm: password_confirm,
             },
-            success: function(resp) {
+            success: function (resp) {
                 console.log(resp);
                 if (resp.result === "success") {
                     location.reload();  // 刷新页面
@@ -197,22 +201,10 @@ class Settings {
         $.ajax({
             url: "https://app820.acapp.acwing.com.cn/settings/logout/",
             type: "GET",
-            success: function(resp) {
+            success: function (resp) {
                 console.log(resp);
                 if (resp.result === "success") {
                     location.reload();
-                }
-            }
-        });
-    }
-    acwing_login() {// 申请acwing第三方登录
-        $.ajax({
-            url: "https://app820.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
-            type: "GET",
-            success: function (resp) {
-                console.log(resp)
-                if (resp.result === "success") {
-                    window.location.replace(resp.apply_code_url);
                 }
             }
         });
@@ -228,7 +220,46 @@ class Settings {
         this.$login.show();
     }
 
-    getinfo() {
+    acwing_login() {// 申请acwing第三方登录
+        $.ajax({
+            url: "https://app820.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
+            type: "GET",
+            success: function (resp) {
+                if (resp.result === "success") {
+                    window.location.replace(resp.apply_code_url);
+                }
+            }
+        });
+    }
+
+    acapp_login(appid, redirect_uri, scope, state) { // 调用AcWingOS登录授权API
+        let outer = this;
+
+        this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function (resp) {
+            if (resp.result === "success") {
+                outer.username = resp.username;
+                outer.photo = resp.photo;
+                outer.hide();
+                outer.root.menu.show();
+            }
+        });
+    }
+
+
+    getinfo_acapp() { // 向后端申请code
+        let outer = this;
+        $.ajax({
+            url: "https://app820.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
+            type: "GET",
+            success: function (resp) {
+                if (resp.result === "success") {
+                    outer.acapp_login(resp.appid, resp.redirect_uri, resp.scope, resp.state);
+                }
+            }
+        });
+    }
+
+    getinfo_web() {
         let outer = this;
 
         $.ajax({
@@ -237,7 +268,7 @@ class Settings {
             data: {
                 platform: outer.platform,
             },
-            success: function(resp) {
+            success: function (resp) {
                 if (resp.result === "success") {
                     outer.username = resp.username;
                     outer.photo = resp.photo;

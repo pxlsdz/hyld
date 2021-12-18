@@ -1,12 +1,11 @@
 export class Hyld {
     // 构造函数
-    constructor(id, AcwingOS) {
+    constructor(id, AcWingOS) {
         // 这个id是前端传进来的div的id
         this.id = id;
         // 我们要找这个div中的id的话，jquery中要使用('#'+id).
         this.$hyld = $('#' + id);
-        this.AcwingOS = AcwingOS;
-
+        this.AcWingOS = AcWingOS;
 
         // 登录注册窗口
         this.settings = new Settings(this);
