@@ -7,11 +7,10 @@ class Player extends HyldObject {
      * @param radius 圆的半径，每个玩家用圆表示
      * @param color 圆的颜色
      * @param speed 玩家的移动速度，用每秒移动高度的百分比表示，因为每个浏览器的像素表示不一样
-     * @param is_me 判断当前角色是自己还是敌人
      */
-    constructor(playground, x, y, radius, color, speed, is_me) {
+    constructor(playground, x, y, radius, color, speed, character, username, photo) {
         // speed 我们用高度的百分比来表示移动的速度
-        //is_me 因为自己和敌人的操作方式是不一样的，需要加一个标签来判断一下是否是自己
+
         super();
         this.playground = playground;
         this.ctx = this.playground.game_map.ctx; // 画布的一个引用
@@ -26,24 +25,27 @@ class Player extends HyldObject {
         this.radius = radius;
         this.color = color;
         this.speed = speed;
-        this.is_me = is_me;
+
+        this.character = character;
+        this.username = username;
+        this.photo = photo;
+
         this.eps = 0.01; // 一个浮点运算的标记，小于eps就算是零
         this.friction = 0.9; // 摩擦力
         this.spent_time = 0; // 保护期
 
         this.cur_skill = null; // 标记当前是否选中技能（未来会有多个技能）
-
-        if (this.is_me) { // 加载头像
+        if (this.character !== "robot") { // 加载头像
             this.img = new Image();
-            this.img.src = this.playground.root.settings.photo;
+            this.img.src = this.photo;
         }
 
     }
 
     start() {
-        if (this.is_me) {
+        if (this.character === "me") {
             this.add_listening_events();
-        } else {
+        } else if (this.character === "robot") {
             let tx = Math.random() * this.playground.width / this.playground.scale;
             let ty = Math.random() * this.playground.height / this.playground.scale;
             this.move_to(tx, ty);
@@ -132,7 +134,7 @@ class Player extends HyldObject {
 
     update_move() {  // 更新玩家移动
         this.spent_time += this.timedelta / 1000; // 保护期累加
-        if (!this.is_me && this.spent_time > 4 && Math.random() < 1 / 300.0) {
+        if (this.character === "robot" && this.spent_time > 4 && Math.random() < 1 / 300.0) {
             // 随机选中一名玩家，攻击
             let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];
             // 对其行动轨迹预判
@@ -151,7 +153,7 @@ class Player extends HyldObject {
             if (this.move_length < this.eps) {
                 this.move_length = 0;
                 this.vx = this.vy = 0;
-                if (!this.is_me) {
+                if (this.character === "robot") {
                     let tx = Math.random() * this.playground.width / this.playground.scale;
                     let ty = Math.random() * this.playground.height / this.playground.scale;
                     this.move_to(tx, ty);
@@ -169,7 +171,7 @@ class Player extends HyldObject {
 
     render() { // 渲染函数，画一个圆或以图片当头像
         let scale = this.playground.scale;
-        if (this.is_me) {
+        if (this.character !== "robot") {
             this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
