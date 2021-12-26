@@ -29,7 +29,7 @@ class HyldPlayground {
         let unit = Math.min(this.width / 16, this.height / 9);
         this.width = unit * 16;
         this.height = unit * 9;
-        this.scale = this.height; //
+        this.scale = this.height; // 单位
 
         if (this.game_map) this.game_map.resize();
     }
@@ -57,6 +57,8 @@ class HyldPlayground {
                 this.players.push(new Player(this, this.width / 2 / this.scale, 0.5, 0.05, this.get_random_color(), 0.15, "robot"));
             }
         } else if (mode === "multi mode") {
+            this.chat_field = new ChatField(this);
+
             this.mps = new MultiPlayerSocket(this);
             this.mps.uuid = this.players[0].uuid;
 
@@ -64,9 +66,6 @@ class HyldPlayground {
                 outer.mps.send_create_player(outer.root.settings.username, outer.root.settings.photo);
             };
         }
-
-
-
     }
 
     hide() {  // 关闭playground界面

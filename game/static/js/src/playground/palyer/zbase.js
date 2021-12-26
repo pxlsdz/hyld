@@ -78,9 +78,10 @@ class Player extends HyldObject {
         this.playground.game_map.$canvas.on("contextmenu", function () {// 关闭右键菜单
             return false;
         });
+
         this.playground.game_map.$canvas.mousedown(function (e) {// 将鼠标右键和该函数绑定
             if (outer.playground.state !== "fighting")
-                return false;
+                return true;// false 会将事件阻断掉
 
             const rect = outer.ctx.canvas.getBoundingClientRect();
             if (e.which === 3) {// 右键是3，滚轮2，左键是1
@@ -108,7 +109,7 @@ class Player extends HyldObject {
                         return false;
                     outer.blink(tx, ty);
 
-                     if (outer.playground.mode === "multi mode") {
+                    if (outer.playground.mode === "multi mode") {
                         outer.playground.mps.send_blink(tx, ty);
                     }
                 }
@@ -117,7 +118,19 @@ class Player extends HyldObject {
             }
         });
 
-        $(window).keydown(function (e) {// 监听键盘按键
+        this.playground.game_map.$canvas.keydown(function (e) {// 监听键盘按键
+            if (e.which === 13) { //enter键 打开聊天框
+                if (outer.playground.mode === "multi mode") {
+                    outer.playground.chat_field.show_input();
+                }
+                return false;
+            } else if (e.which === 27) { // esc键 关闭聊天框
+                if (outer.playground.mode === "multi mode") {
+                    outer.playground.chat_field.hide_input();
+                }
+                return false;
+            }
+
             if (outer.playground.state !== "fighting")
                 return true; // 返回false, 会让按键失效
 
@@ -333,7 +346,7 @@ class Player extends HyldObject {
     }
 
     on_destroy() {
-        if(this.character === "me")
+        if (this.character === "me")
             this.playground.state = "over";
         for (let i = 0; i < this.playground.players.length; i++) {
             if (this.playground.players[i] === this) {

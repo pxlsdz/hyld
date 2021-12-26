@@ -2,7 +2,7 @@ class GameMap extends HyldObject { // 继承游戏引擎，这个类是游戏地
     constructor(playground) {
         super();
         this.playground = playground;
-        this.$canvas = $(`<canvas></canvas>`);// canvas是一个图形绘制的标签，只是图形容器，需要使用脚本来绘制图形。
+        this.$canvas = $(`<canvas tabindex=0></canvas>`);// canvas是一个图形绘制的标签，只是图形容器，需要使用脚本来绘制图形。
         this.ctx = this.$canvas[0].getContext('2d');
         this.ctx.canvas.width = this.playground.width;
         this.ctx.canvas.height = this.playground.height;
@@ -10,6 +10,7 @@ class GameMap extends HyldObject { // 继承游戏引擎，这个类是游戏地
     }
 
     start() {
+        this.$canvas.focus(); // 聚焦窗口
     }
 
     resize() {

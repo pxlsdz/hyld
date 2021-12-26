@@ -9,15 +9,14 @@ class MultiPlayer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):  # 大概率断开连接时调用
-        print('disconnect')
         await self.channel_layer.group_discard(self.room_name, self.channel_name)
 
     async def create_player(self, data):
         self.room_name = None
 
         start = 0
-        if data['username'] != "pxlsdz":
-            start = 100
+        # if data['username'] != "pxlsdz":
+        #     start = 100
 
         # 枚举可用房间
         for i in range(start, 10000):
@@ -118,6 +117,18 @@ class MultiPlayer(AsyncWebsocketConsumer):
             }
         )
 
+    async def message(self, data):
+        await self.channel_layer.group_send(
+            self.room_name,
+            {
+                'type': "group_send_event",
+                'event': "message",
+                'uuid': data['uuid'],
+                'username': data['username'],
+                'text': data['text'],
+            }
+        )
+
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
 
@@ -135,3 +146,5 @@ class MultiPlayer(AsyncWebsocketConsumer):
             await self.attack(data)
         elif event == "blink":
             await self.blink(data)
+        elif event == "message":
+            await self.message(data)
