@@ -43,7 +43,8 @@ class Player extends HyldObject {
         }
 
         if (this.character === "me") {
-            this.fireball_coldtime = 3; // 单位：秒s
+            this.fireball_coldtime = 0.1; // 单位：秒s
+            console.log(this.fireball_coldtime)
             this.fireball_img = new Image();
             this.fireball_img.src = "https://cdn.acwing.com/media/article/image/2021/12/02/1_9340c86053-fireball.png";
 
@@ -161,7 +162,7 @@ class Player extends HyldObject {
         let fireball = new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, 0.01);
         this.fireballs.push(fireball)
 
-        this.fireball_coldtime = 3;
+        this.fireball_coldtime = 0.1;
 
         return fireball
     }
@@ -233,11 +234,20 @@ class Player extends HyldObject {
     update() {
         this.spent_time += this.timedelta / 1000; // 保护期累加
 
+        this.update_win();
+
         if (this.character === "me" && this.playground.state === "fighting")
             this.update_coldtime();
 
         this.update_move();
         this.render();
+    }
+
+    update_win() {
+        if(this.playground.state ==="fighting" && this.character === "me" && this.playground.players.length === 1){
+            this.playground.state =  "over";
+            this.playground.score_board.win();
+        }
     }
 
     update_coldtime() {
@@ -346,10 +356,16 @@ class Player extends HyldObject {
     }
 
     on_destroy() {
-        if (this.character === "me")
-            this.playground.state = "over";
+        if (this.character === "me"){
+            if(this.playground.state === "fighting") {
+                this.playground.state = "over";
+                this.playground.score_board.lose();
+            }
+        }
+
         for (let i = 0; i < this.playground.players.length; i++) {
             if (this.playground.players[i] === this) {
+
                 this.playground.players.splice(i, 1);
                 break;
             }

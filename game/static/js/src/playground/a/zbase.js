@@ -26,6 +26,9 @@ class HyldObject {
     update() {  // 每一帧均会执行一次，玩家移动，或者发动技能，每一帧都要进行更新
     }
 
+    late_update() { // 在每一帧的最后执行一次
+    }
+
     on_destroy() {  // 在被销毁前执行一次，当有玩家被杀掉后，有的玩家要加分等等一系列的操作
     }
 
@@ -56,6 +59,11 @@ let HYLD_ANIMATION = function (timestamp) {
             obj.timedelta = timestamp - last_timestamp;
             obj.update();
         }
+    }
+
+    for (let i = 0; i < HYLD_OBJECTS.length; i++){
+        let obj = HYLD_OBJECTS[i];
+        obj.late_update()
     }
     last_timestamp = timestamp;
 
