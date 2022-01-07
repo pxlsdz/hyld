@@ -8,7 +8,7 @@ class Player extends HyldObject {
      * @param color 圆的颜色
      * @param speed 玩家的移动速度，用每秒移动高度的百分比表示，因为每个浏览器的像素表示不一样
      */
-    constructor(playground, x, y, radius, color, speed, character, username, photo) {
+    constructor(playground, x, y, radius, color, speed, character, username, photo, team_id) {
         // speed 我们用高度的百分比来表示移动的速度
 
         super();
@@ -26,6 +26,7 @@ class Player extends HyldObject {
         this.color = color;
         this.speed = speed;
 
+        this.team_id = team_id;
         this.character = character;
         this.username = username;
         this.photo = photo;
@@ -44,7 +45,6 @@ class Player extends HyldObject {
 
         if (this.character === "me") {
             this.fireball_coldtime = 0.1; // 单位：秒s
-            console.log(this.fireball_coldtime)
             this.fireball_img = new Image();
             this.fireball_img.src = "https://cdn.acwing.com/media/article/image/2021/12/02/1_9340c86053-fireball.png";
 
@@ -57,11 +57,15 @@ class Player extends HyldObject {
 
     start() {
         this.playground.player_count++;
-        this.playground.notic_board.write("已就绪： " + this.playground.player_count + "人");
+        // this.playground.notic_board.write("已就绪： " + this.playground.player_count + "人");
+        if(this.playground.mode === "multi mode")
+            this.playground.notic_board.write( "匹配中，Enter：聊天，Esc：退出聊天");
+        else if(this.playground.mode === "team mode")
+            this.playground.notic_board.write( "组队匹配中，Enter：聊天，Esc：退出聊天");
 
         if (this.playground.player_count >= 3) {
             this.playground.state = "fighting";
-            this.playground.notic_board.write("Fighting");
+            this.playground.notic_board.write("Fighting，Q+鼠标左键：火球，F+鼠标左键：闪现，鼠标右键：移动");
         }
 
         if (this.character === "me") {
@@ -89,7 +93,7 @@ class Player extends HyldObject {
                 let tx = (e.clientX - rect.left) / outer.playground.scale;
                 let ty = (e.clientY - rect.top) / outer.playground.scale;
                 outer.move_to(tx, ty);
-                if (outer.playground.mode === "multi mode") {
+                if (outer.playground.mode === "multi mode" || outer.playground.mode === "team mode") {
                     outer.playground.mps.send_move_to(tx, ty);
                 }
             } else if (e.which === 1) {
@@ -102,7 +106,7 @@ class Player extends HyldObject {
                         return false;
                     let fireball = outer.shoot_fireball(tx, ty);
 
-                    if (outer.playground.mode === "multi mode") {
+                    if (outer.playground.mode === "multi mode" || outer.playground.mode === "team mode") {
                         outer.playground.mps.send_shoot_fireball(tx, ty, fireball.uuid);
                     }
                 } else if (outer.cur_skill === "blink") {
@@ -110,7 +114,7 @@ class Player extends HyldObject {
                         return false;
                     outer.blink(tx, ty);
 
-                    if (outer.playground.mode === "multi mode") {
+                    if (outer.playground.mode === "multi mode" || outer.playground.mode === "team mode") {
                         outer.playground.mps.send_blink(tx, ty);
                     }
                 }
@@ -121,12 +125,12 @@ class Player extends HyldObject {
 
         this.playground.game_map.$canvas.keydown(function (e) {// 监听键盘按键
             if (e.which === 13) { //enter键 打开聊天框
-                if (outer.playground.mode === "multi mode") {
+                if (outer.playground.mode === "multi mode" || outer.playground.mode === "team mode") {
                     outer.playground.chat_field.show_input();
                 }
                 return false;
             } else if (e.which === 27) { // esc键 关闭聊天框
-                if (outer.playground.mode === "multi mode") {
+                if (outer.playground.mode === "multi mode" || outer.playground.mode === "team mode") {
                     outer.playground.chat_field.hide_input();
                 }
                 return false;
@@ -234,7 +238,7 @@ class Player extends HyldObject {
     update() {
         this.spent_time += this.timedelta / 1000; // 保护期累加
 
-        this.update_win();
+        // this.update_win();
 
         if (this.character === "me" && this.playground.state === "fighting")
             this.update_coldtime();
@@ -243,12 +247,17 @@ class Player extends HyldObject {
         this.render();
     }
 
-    update_win() {
-        if(this.playground.state ==="fighting" && this.character === "me" && this.playground.players.length === 1){
-            this.playground.state =  "over";
-            this.playground.score_board.win();
-        }
-    }
+    // update_win() {
+    //     if (this.playground.state === "fighting" && this.character === "me") {
+    //         if (this.playground.players.length === 1) {
+    //             this.playground.state = "over";
+    //             this.playground.score_board.win();
+    //         }else if (this.playground.players.length === 2 && this.playground.players[0].team_id === this.playground.players[1].team_id ) {
+    //             this.playground.state = "over";
+    //             this.playground.score_board.win();
+    //         }
+    //     }
+    // }
 
     update_coldtime() {
         this.fireball_coldtime -= this.timedelta / 1000;
@@ -356,8 +365,8 @@ class Player extends HyldObject {
     }
 
     on_destroy() {
-        if (this.character === "me"){
-            if(this.playground.state === "fighting") {
+        if (this.playground.mode !== "team mode" && this.character === "me") {
+            if (this.playground.state === "fighting") {
                 this.playground.state = "over";
                 this.playground.score_board.lose();
             }

@@ -14,6 +14,10 @@ class HyldMenu {
                         多人模式
                     </div>
                     <br>
+                    <div class="hyld-menu-field-item hyld-menu-field-item-team-mode">
+                        组队模式
+                    </div>
+                    <br>
                     <div class="hyld-menu-field-item hyld-menu-field-item-settings">
                         退出
                     </div>
@@ -25,6 +29,7 @@ class HyldMenu {
         // 找到上方html对象定义的三个按钮
         this.$single_mode = this.$menu.find('.hyld-menu-field-item-single-mode');
         this.$multi_mode = this.$menu.find('.hyld-menu-field-item-multi-mode');
+        this.$team_mode = this.$menu.find('.hyld-menu-field-item-team-mode');
         this.$settings = this.$menu.find('.hyld-menu-field-item-settings');
 
         this.start();
@@ -43,6 +48,10 @@ class HyldMenu {
         this.$multi_mode.click(function(){
             outer.hide();
             outer.root.playground.show("multi mode");
+        });
+        this.$team_mode.click(function(){
+            outer.hide();
+            outer.root.playground.show("team mode");
         });
         this.$settings.click(function(){
             outer.root.settings.logout_on_remote();

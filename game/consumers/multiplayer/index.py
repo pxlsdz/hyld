@@ -21,11 +21,11 @@ class MultiPlayer(AsyncWebsocketConsumer):
         if self.room_name:
             await self.channel_layer.group_discard(self.room_name, self.channel_name)
 
-    async def create_player(self, data):
+    async def create_player(self, data, port):
         self.room_name = None
 
         # Make socket
-        transport = TSocket.TSocket('localhost', 9090)
+        transport = TSocket.TSocket('localhost', port)
 
         # Buffering is critical. Raw sockets are very slow
         transport = TTransport.TBufferedTransport(transport)
@@ -88,24 +88,31 @@ class MultiPlayer(AsyncWebsocketConsumer):
             if player['uuid'] == data['attackee_uuid']:
                 player['hp'] -= 25
 
-        remain_cnt = 0
+        # 输赢积分判定
+        win_team_id = -1
+        is_win = True
         for player in players:
             if player['hp'] > 0:
-                remain_cnt += 1
-
-        if remain_cnt > 1:
-            if self.room_name:
-                cache.set(self.room_name, players, 3600)
-        else:
+                if win_team_id == -1:
+                    win_team_id = player['team_id']
+                else:
+                    if win_team_id != player['team_id']:
+                        is_win = False
+                        break
+        if is_win:
             def dp_update_player_score(username, score):
                 player = Player.objects.get(user__username=username)
                 player.score += score
                 player.save()
+
             for player in players:
-                if player['hp'] <= 0:
+                if player['team_id'] != win_team_id:
                     await database_sync_to_async(dp_update_player_score)(player['username'], -5)
                 else:
                     await database_sync_to_async(dp_update_player_score)(player['username'], 10)
+        else:
+            if self.room_name:
+                cache.set(self.room_name, players, 3600)
 
         await self.channel_layer.group_send(
             self.room_name,
@@ -158,7 +165,9 @@ class MultiPlayer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         event = data['event']
         if event == "create_player":
-            await self.create_player(data)
+            await self.create_player(data, 9090)
+        elif event == "create_team_player":
+            await self.create_player(data, 9091)
         elif event == "move_to":
             await self.move_to(data)
         elif event == "shoot_fireball":

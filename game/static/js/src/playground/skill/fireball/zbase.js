@@ -59,6 +59,8 @@ class FireBall extends HyldObject {
     }
 
     is_collision(player) {
+        console.log(this.player.team_id, this.player.uuid, player.team_id, player.uuid)
+        if (this.player.team_id === player.team_id) return false;
         let distance = this.get_dist(this.x, this.y, player.x, player.y);
         if (distance < this.radius + player.radius)
             return true;
@@ -69,7 +71,7 @@ class FireBall extends HyldObject {
         let angle = Math.atan2(player.y - this.y, player.x - this.x);
         player.is_attacked(angle, this.damage);
 
-        if (this.playground.mode === "multi mode") {
+        if (this.playground.mode === "multi mode" || this.playground.mode === "team mode") {
             this.playground.mps.send_attack(player.uuid, player.x, player.y, angle, this.damage, this.uuid);
         }
 

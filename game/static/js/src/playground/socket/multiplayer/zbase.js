@@ -11,7 +11,7 @@ class MultiPlayerSocket {
         this.receive();
     }
 
-    // 接收后端发来的创建玩家消息
+    // 接收后端发来消息
     receive() {
         let outer = this;
 
@@ -19,12 +19,20 @@ class MultiPlayerSocket {
 
             let data = JSON.parse(e.data);
             let uuid = data.uuid;
-            // 判断是否是自己
-            if (uuid === outer.uuid) return false;
-
             let event = data.event;
+            // 判断是否是自己
+
+            if (uuid === outer.uuid) {
+                if (event === "create_player") {
+                    let player = outer.get_player(uuid);
+                    player.team_id = data.team_id
+                    outer.playground.team_id = data.team_id;
+                }
+                return false;
+            }
+
             if (event === "create_player") {
-                outer.receive_create_player(uuid, data.username, data.photo);
+                outer.receive_create_player(uuid, data.username, data.photo, data.team_id);
             } else if (event === "move_to") {
                 outer.receive_move_to(uuid, data.tx, data.ty);
             } else if (event === "shoot_fireball") {
@@ -40,18 +48,17 @@ class MultiPlayerSocket {
     }
 
     // 向服务器发送创建用户消息
-    send_create_player(username, photo) {
+    send_create_player(username, photo, event) {
         let outer = this;
         this.ws.send(JSON.stringify({
-            'event': "create_player",
+            'event': event,
             'uuid': outer.uuid,
             'username': username,
             'photo': photo,
         }));
     }
 
-
-    receive_create_player(uuid, username, photo) {
+    receive_create_player(uuid, username, photo, team_id) {
         let player = new Player(
             this.playground,
             this.playground.width / 2 / this.playground.scale,
@@ -62,6 +69,7 @@ class MultiPlayerSocket {
             "enemy",
             username,
             photo,
+            team_id
         );
         //每一个对象的uuid等于创建它窗口的uuid
         player.uuid = uuid;
@@ -159,7 +167,6 @@ class MultiPlayerSocket {
     }
 
     send_message(username, text) {
-        console.log(username);
         let outer = this;
         this.ws.send(JSON.stringify({
             'event': "message",
@@ -170,7 +177,6 @@ class MultiPlayerSocket {
     }
 
     receive_message(uuid, username, text) {
-        console.log(username);
         this.playground.chat_field.add_message(username, text);
     }
 }

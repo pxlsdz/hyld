@@ -54,9 +54,10 @@ class Pool:
         return dt <= a_max_dif and dt <= b_max_dif
 
     def match_success(self, ps):
-        print("Match Success: %s %s %s" % (ps[0].username, ps[1].username, ps[2].username))
-        room_name = "room-%s-%s-%s" % (ps[0].uuid, ps[1].uuid, ps[2].uuid)
+        print("Match Success: %s %s %s %s" % (ps[0].username, ps[1].username, ps[2].username,  ps[3].username))
+        room_name = "room-%s-%s-%s-%s" % (ps[0].uuid, ps[1].uuid, ps[2].uuid, ps[3].uuid)
         players = []
+        i = 0
         for p in ps:
             async_to_sync(channel_layer.group_add)(room_name, p.channel_name)
             players.append({
@@ -64,9 +65,12 @@ class Pool:
                 'username': p.username,
                 'photo': p.photo,
                 'hp': 100,
-                'team_id': p.uuid
+                'team_id': i % 2
             })
+            i += 1
         cache.set(room_name, players, 3600)
+
+        i = 0
         for p in ps:
             async_to_sync(channel_layer.group_send)(
                 room_name,
@@ -76,23 +80,24 @@ class Pool:
                     'uuid': p.uuid,
                     'username': p.username,
                     'photo': p.photo,
-                    'team_id': p.uuid,
+                    'team_id': i % 2
                 }
             )
+            i += 1
 
     def increase_waiting_time(self):
         for player in self.players:
             player.waiting_time += 1
 
     def match(self):
-        while len(self.players) >= 3:
+        while len(self.players) >= 4:
             self.players = sorted(self.players, key=lambda p: p.score)
             flag = False
-            for i in range(len(self.players) - 2):
-                a, b, c = self.players[i], self.players[i + 1], self.players[i + 2]
-                if self.check_match(a, b) and self.check_match(a, c) and self.check_match(b, c):
-                    self.match_success([a, b, c])
-                    self.players = self.players[:i] + self.players[i + 3:]
+            for i in range(len(self.players) - 3):
+                a, b, c, d = self.players[i], self.players[i + 1], self.players[i + 2], self.players[i + 3]
+                if self.check_match(a, b) and self.check_match(a, c) and self.check_match(b, c) and self.check_match(c, d):
+                    self.match_success([a, b, d, c])
+                    self.players = self.players[:i] + self.players[i + 4:]
                     flag = True
                     break
             if not flag:
@@ -133,7 +138,7 @@ def worker():
 if __name__ == '__main__':
     handler = MatchHandler()
     processor = Match.Processor(handler)
-    transport = TSocket.TServerSocket(host='127.0.0.1', port=9090)
+    transport = TSocket.TServerSocket(host='127.0.0.1', port=9091)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
