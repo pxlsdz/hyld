@@ -25,7 +25,7 @@ class GameMap extends HyldObject { // 继承游戏引擎，这个类是游戏地
     }
 
     render() {// 渲染函数
-        this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; // 填充颜色，0.2是透明度，产生一个渐变的过程
+        this.ctx.fillStyle = "rgba(0, 0, 0, 1)"; // 填充颜色，0.2是透明度，产生一个渐变的过程
         this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);// 画一个长方形
     }
 }

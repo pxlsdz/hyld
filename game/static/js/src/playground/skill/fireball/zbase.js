@@ -59,7 +59,6 @@ class FireBall extends HyldObject {
     }
 
     is_collision(player) {
-        console.log(this.player.team_id, this.player.uuid, player.team_id, player.uuid)
         if (this.player.team_id === player.team_id) return false;
         let distance = this.get_dist(this.x, this.y, player.x, player.y);
         if (distance < this.radius + player.radius)

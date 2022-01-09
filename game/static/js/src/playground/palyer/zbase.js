@@ -7,6 +7,10 @@ class Player extends HyldObject {
      * @param radius 圆的半径，每个玩家用圆表示
      * @param color 圆的颜色
      * @param speed 玩家的移动速度，用每秒移动高度的百分比表示，因为每个浏览器的像素表示不一样
+     * @param character
+     * @param username
+     * @param photo
+     * @param team_id
      */
     constructor(playground, x, y, radius, color, speed, character, username, photo, team_id) {
         // speed 我们用高度的百分比来表示移动的速度
@@ -34,6 +38,12 @@ class Player extends HyldObject {
         this.eps = 0.01; // 一个浮点运算的标记，小于eps就算是零
         this.friction = 0.9; // 摩擦力
         this.spent_time = 0; // 保护期
+        this.hp = 100;
+        this.max_hp = 100;
+        this.drop_hp = 25;
+
+        this.attacked_state = false;
+        this.attacked_time = 0; // 掉血显示时间1s
 
         this.fireballs = []
 
@@ -58,10 +68,10 @@ class Player extends HyldObject {
     start() {
         this.playground.player_count++;
         // this.playground.notic_board.write("已就绪： " + this.playground.player_count + "人");
-        if(this.playground.mode === "multi mode")
-            this.playground.notic_board.write( "匹配中，Enter：聊天，Esc：退出聊天");
-        else if(this.playground.mode === "team mode")
-            this.playground.notic_board.write( "组队匹配中，Enter：聊天，Esc：退出聊天");
+        if (this.playground.mode === "multi mode")
+            this.playground.notic_board.write("匹配中，Enter：聊天，Esc：退出聊天");
+        else if (this.playground.mode === "team mode")
+            this.playground.notic_board.write("组队匹配中，Enter：聊天，Esc：退出聊天");
 
         if (this.playground.player_count >= 3) {
             this.playground.state = "fighting";
@@ -206,6 +216,8 @@ class Player extends HyldObject {
     }
 
     is_attacked(angle, damage) {
+        this.attacked_state = true; // 受到攻击显形
+        this.attacked_time = 1; // 显形0.1s
         //释放粒子
         for (let i = 0; i < 20 + Math.random() * 10; i++) {
             let x = this.x, y = this.y;
@@ -217,7 +229,9 @@ class Player extends HyldObject {
             let move_length = this.radius * Math.random() * 5;
             new Particle(this.playground, x, y, radius, vx, vy, color, speed, move_length);
         }
+
         this.radius -= damage;
+        this.hp -= this.drop_hp;
         if (this.radius < this.eps) {
             this.destroy();
             return false;
@@ -244,6 +258,9 @@ class Player extends HyldObject {
             this.update_coldtime();
 
         this.update_move();
+
+        this.update_attacked_state();
+
         this.render();
     }
 
@@ -303,6 +320,15 @@ class Player extends HyldObject {
         }
     }
 
+    update_attacked_state() {
+        if (this.attacked_state && this.attacked_time > this.eps) {
+            this.attacked_time -= this.timedelta / 1000;
+            this.attacked_time = Math.max(0, this.attacked_time);
+            if (this.attacked_time < this.eps)
+                this.attacked_state = false;
+        }
+    }
+
     render() { // 渲染函数，画一个圆或以图片当头像
         let scale = this.playground.scale;
         if (this.character !== "robot") {
@@ -322,6 +348,18 @@ class Player extends HyldObject {
 
         if (this.character === "me" && this.playground.state === "fighting")
             this.render_skill_coldtime()
+        if (this.playground.state === "fighting") {
+            if (this.team_id === this.playground.team_id) {
+                this.render_hp_bar(this.x * scale, this.y * scale, scale, "rgb(40,71,226)"); // 蓝色
+            } else {
+                this.render_hp_bar(this.x * scale, this.y * scale, scale, "rgb(249, 19, 51)"); // 红色
+            }
+        }
+
+        if (this.attacked_state)
+            this.render_drop_hp(this.x, this.y, scale);
+
+
     }
 
     // 技能绘画
@@ -363,6 +401,60 @@ class Player extends HyldObject {
             this.ctx.fill();
         }
     }
+
+    render_hp_bar(x, y, scale, color) {
+        this.ctx.save();
+
+        // 边框
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, this.radius * 1.1 * scale, 0, -Math.PI, true);
+        this.ctx.lineTo(x - this.radius * 1.3 * scale, y);
+        this.ctx.arc(x, y, this.radius * 1.3 * scale, Math.PI, Math.PI * 2, false);
+        this.ctx.lineTo(x + this.radius * 1.1 * scale, y);
+        this.ctx.strokeStyle = "white";
+        this.ctx.lineWidth = 3;
+        this.ctx.stroke();
+
+        // 血量条
+        let start_angle = -(1 - this.hp / this.max_hp) * Math.PI;
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, this.radius * 1.1 * scale, start_angle, -Math.PI, true);
+        this.ctx.lineTo(x - this.radius * 1.3 * scale, y);
+        this.ctx.arc(x, y, this.radius * 1.3 * scale, Math.PI, Math.PI * 2 + start_angle, false);
+        this.ctx.fillStyle = color;
+        this.ctx.fill();
+
+        // 血量值
+        this.ctx.font = 0.02 * scale + "px bold serif";
+        this.ctx.fillStyle = "rgb(250,250,250)";
+        this.textAlign = "center";
+        this.ctx.fillText(this.hp, x + this.radius * 1.6 * scale, y);
+
+        // 掉血量条
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, this.radius * 1.1 * scale, 0, start_angle, true);
+        this.ctx.lineTo(x + (this.radius * 1.3 * Math.cos(start_angle)) * scale, y + this.radius * 1.3 * Math.sin(start_angle) * scale);
+        this.ctx.arc(x, y, this.radius * 1.3 * scale, Math.PI * 2 + start_angle, Math.PI * 2, false);
+        this.ctx.fillStyle = "rgb(44, 65, 43)";
+        this.ctx.fill();
+
+        this.ctx.restore();
+    }
+    render_drop_hp(ctx_x, ctx_y, scale) {
+        this.ctx.font = 0.03 * scale + "px bold serif";
+        this.ctx.fillStyle = "rgba(229, 30, 97, " + (this.attacked_time / 1) * (this.attacked_time / 1) + ")";
+        this.ctx.textAlign = "center";
+        this.ctx.fillText(-this.drop_hp, ctx_x * scale, (ctx_y - 0.05 - 0.04 * (1 - this.attacked_time / 1)) * scale);
+
+    }
+
+    // render_gain_hp(ctx_x, ctx_y, scale) {
+    //     this.ctx.font = 0.03 * scale + "px bold serif";
+    //     this.ctx.fillStyle = "rgba(51, 226, 40, " + (this.gain_hp_time / 1) * (this.gain_hp_time / 1) + ")"; // 绿
+    //     this.ctx.textAlign = "center";
+    //     this.ctx.fillText("+" + this.gain_hp, ctx_x * scale, (ctx_y - 0.05 - 0.04 * (1 - this.gain_hp_time / 1)) * scale);
+    //
+    // }
 
     on_destroy() {
         if (this.playground.mode !== "team mode" && this.character === "me") {
