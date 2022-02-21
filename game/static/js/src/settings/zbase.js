@@ -33,11 +33,18 @@ class Settings {
             注册
         </div>
         <br>
+<!--        <div class="hyld-settings-acwing">-->
+<!--            <img width="30" src="http://121.199.59.80/static/image/settings/acwing_logo.png">-->
+<!--            <br>-->
+<!--            <div>-->
+<!--                AcWing一键登录-->
+<!--            </div>-->
+<!--        </div>-->
         <div class="hyld-settings-acwing">
-            <img width="30" src="http://121.199.59.80/static/image/settings/acwing_logo.png">
+            <img width="30" src="https://cdn.acwing.com/media/article/image/2021/12/07/97206_139a1a0356-gitee_logo.jpg">
             <br>
             <div>
-                AcWing一键登录
+                Gitee一键登录
             </div>
         </div>
     </div>
@@ -71,11 +78,18 @@ class Settings {
             登录
         </div>
         <br>
+<!--        <div class="hyld-settings-acwing">-->
+<!--            <img width="30" src="http://121.199.59.80/static/image/settings/acwing_logo.png">-->
+<!--            <br>-->
+<!--            <div>-->
+<!--                AcWing一键登录-->
+<!--            </div>-->
+<!--        </div>-->
         <div class="hyld-settings-acwing">
-            <img width="30" src="http://121.199.59.80/static/image/settings/acwing_logo.png">
+            <img width="30" src="https://cdn.acwing.com/media/article/image/2021/12/07/97206_139a1a0356-gitee_logo.jpg">
             <br>
             <div>
-                AcWing一键登录
+                Gitee一键登录
             </div>
         </div>
     </div>
@@ -105,12 +119,11 @@ class Settings {
         this.root.$hyld.append(this.$settings);
 
 
-
         this.start();
     }
 
     start() {
-        if (this.platform == "ACAPP") {
+        if (this.platform === "ACAPP") {
             this.getinfo_acapp();
         } else {
             this.getinfo_web();
@@ -132,8 +145,11 @@ class Settings {
         this.$login_submit.click(function () {
             outer.login_on_remote();
         });
+        // this.$acwing_login.click(function () {
+        //     outer.acwing_login();
+        // })
         this.$acwing_login.click(function () {
-            outer.acwing_login();
+            outer.gitee_login();
         })
     }
 
@@ -154,13 +170,9 @@ class Settings {
         this.$login_error_message.empty();
 
         $.ajax({
-            url: "http://121.199.59.80/settings/login/",
-            type: "GET",
-            data: {
-                username: username,
-                password: password,
-            },
-            success: function (resp) {
+            url: "http://121.199.59.80/settings/login/", type: "GET", data: {
+                username: username, password: password,
+            }, success: function (resp) {
                 if (resp.result === "success") {
                     location.reload();
                 } else {
@@ -178,14 +190,9 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: "http://121.199.59.80/settings/register/",
-            type: "GET",
-            data: {
-                username: username,
-                password: password,
-                password_confirm: password_confirm,
-            },
-            success: function (resp) {
+            url: "http://121.199.59.80/settings/register/", type: "GET", data: {
+                username: username, password: password, password_confirm: password_confirm,
+            }, success: function (resp) {
                 if (resp.result === "success") {
                     location.reload();  // 刷新页面
                 } else {
@@ -200,9 +207,7 @@ class Settings {
             this.root.AcWingOS.api.window.close();
         } else {
             $.ajax({
-                url: "http://121.199.59.80/settings/logout/",
-                type: "GET",
-                success: function (resp) {
+                url: "http://121.199.59.80/settings/logout/", type: "GET", success: function (resp) {
                     if (resp.result === "success") {
                         location.reload();
                     }
@@ -223,9 +228,17 @@ class Settings {
 
     acwing_login() {// 申请acwing第三方登录
         $.ajax({
-            url: "http://121.199.59.80/settings/acwing/web/apply_code/",
-            type: "GET",
-            success: function (resp) {
+            url: "http://121.199.59.80/settings/acwing/web/apply_code/", type: "GET", success: function (resp) {
+                if (resp.result === "success") {
+                    window.location.replace(resp.apply_code_url);
+                }
+            }
+        });
+    }
+
+    gitee_login() {// 申请acwing第三方登录
+        $.ajax({
+            url: "http://121.199.59.80/settings/gitee/apply_code/", type: "GET", success: function (resp) {
                 if (resp.result === "success") {
                     window.location.replace(resp.apply_code_url);
                 }
@@ -250,9 +263,7 @@ class Settings {
     getinfo_acapp() { // 向后端申请code
         let outer = this;
         $.ajax({
-            url: "http://121.199.59.80/settings/acwing/acapp/apply_code/",
-            type: "GET",
-            success: function (resp) {
+            url: "http://121.199.59.80/settings/acwing/acapp/apply_code/", type: "GET", success: function (resp) {
                 if (resp.result === "success") {
                     outer.acapp_login(resp.appid, resp.redirect_uri, resp.scope, resp.state);
                 }
@@ -264,12 +275,9 @@ class Settings {
         let outer = this;
 
         $.ajax({
-            url: "http://121.199.59.80/settings/getinfo/",
-            type: "GET",
-            data: {
+            url: "http://121.199.59.80/settings/getinfo/", type: "GET", data: {
                 platform: outer.platform,
-            },
-            success: function (resp) {
+            }, success: function (resp) {
                 if (resp.result === "success") {
                     outer.username = resp.username;
                     outer.photo = resp.photo;
