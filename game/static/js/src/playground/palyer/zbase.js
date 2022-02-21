@@ -466,7 +466,6 @@ class Player extends HyldObject {
 
         for (let i = 0; i < this.playground.players.length; i++) {
             if (this.playground.players[i] === this) {
-
                 this.playground.players.splice(i, 1);
                 break;
             }

@@ -14,7 +14,7 @@ def get_state():
 # 申请code， 返回重定向的apply_code_uri
 def apply_code(request):
     app_id = "820"
-    redirect_uri = quote("https://app820.acapp.acwing.com.cn/settings/acwing/web/receive_code/")
+    redirect_uri = quote("http://121.199.59.80/settings/acwing/web/receive_code/")
     scope = "userinfo"
     state = get_state()
 

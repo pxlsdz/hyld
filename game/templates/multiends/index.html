@@ -1,0 +1,93 @@
+{% load static %}
+
+<head>
+    <title>sdz 应用中心</title>
+    <meta charset="UTF-8">
+    <link type="stylesheet" href="https://www.layuicdn.com/layui/css/layui.css">
+    <script src="https://www.layuicdn.com/layui/layui.js"></script>
+    <link rel="icon" href="https://cdn.acwing.com/media/article/image/2021/12/17/1_be4c11ce5f-acapp.png">
+    <link rel="stylesheet" href="https://cdn.acwing.com/static/jquery-ui-dist/jquery-ui.min.css">
+    <script src="https://cdn.acwing.com/static/jquery/js/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/game.css' %}">
+    <link rel="icon" href="https://cdn.acwing.com/media/article/image/2021/12/17/1_be4c11ce5f-acapp.png">
+</head>
+<body>
+
+<div id="layerDemo" style="margin-bottom: 0;">
+    <div class="layui-btn-container" style="margin-top: 30px;">
+        <button data-method="setTop" class="layui-btn">打开应用</button>
+    </div>
+</div>
+
+<script>
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            setTop: function () {
+                var that = this;
+                //多窗口模式，层叠置顶
+                layer.open({
+                    type: 2 //此处以iframe举例
+                    ,
+                    title: '游戏'
+                    ,
+                    area: ['800px', '450px']
+                    ,
+                    shade: 0
+                    ,
+                    maxmin: true
+                    ,
+                    offset: 'auto'
+                    ,
+                    content: ['http://121.199.59.80/hyld', 'no']
+
+                    ,
+                    {#btn: ['继续弹出', '全部关闭'] //只是为了演示#}
+                    {#,#}
+                    yes: function () {
+                        $(that).click();
+                    }
+                    ,
+                    btn2: function () {
+                        layer.closeAll();
+                    }
+
+                    ,
+                    zIndex: layer.zIndex //重点1
+                    ,
+                    success: function (layero, index) {
+                        layer.setTop(layero); //重点2. 保持选中窗口置顶
+
+                        //记录索引，以便按 esc 键关闭。事件见代码最末尾处。
+                        layer.escIndex = layer.escIndex || [];
+                        layer.escIndex.unshift(index);
+                        //选中当前层时，将当前层索引放置在首位
+                        layero.on('mousedown', function () {
+                            var _index = layer.escIndex.indexOf(index);
+                            if (_index !== -1) {
+                                layer.escIndex.splice(_index, 1); //删除原有索引
+                            }
+                            layer.escIndex.unshift(index); //将索引插入到数组首位
+                        });
+                    }
+                    ,
+                    end: function () {
+                        //更新索引
+                        if (typeof layer.escIndex === 'object') {
+                            layer.escIndex.splice(0, 1);
+                        }
+                    }
+                });
+            }
+        };
+
+        $('#layerDemo .layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+    });
+</script>
+
+</body>
