@@ -39,9 +39,12 @@
                     ,
                     maxmin: true
                     ,
-                    offset: 'auto'
+                    offset: [ //为了演示，随机坐标
+                        Math.random() * ($(window).height() - 300)
+                        , Math.random() * ($(window).width() - 390)
+                    ]
                     ,
-                    content: ['http://121.199.59.80/hyld', 'no']
+                    content: ['http://121.199.59.80', 'no']
 
                     ,
                     {#btn: ['继续弹出', '全部关闭'] //只是为了演示#}
